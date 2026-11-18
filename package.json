@@ -1,0 +1,32 @@
+{
+  "name": "burger-house-menu",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @burger/web",
+    "build": "npm run build --workspace @burger/web",
+    "start": "npm run start --workspace @burger/web",
+    "db:generate": "prisma generate --schema packages/database/prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema packages/database/prisma/schema.prisma",
+    "db:push": "prisma db push --schema packages/database/prisma/schema.prisma",
+    "db:studio": "prisma studio --schema packages/database/prisma/schema.prisma",
+    "test:e2e": "node tests/offline-e2e.mjs",
+    "qr:generate": "node scripts/generate-qr.mjs"
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "prisma@6.19.3": true,
+    "sharp@0.35.5": true,
+    "bcryptjs@3.0.3": true,
+    "qrcode@1.5.4": true,
+    "esbuild@0.28.2": true
+  }
+}

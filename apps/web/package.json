@@ -1,0 +1,42 @@
+{
+  "name": "@burger/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 0.0.0.0 -p 3000",
+    "build": "next build",
+    "start": "next start -H 0.0.0.0 -p 3000"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "@fontsource/noto-sans-ethiopic": "^5.3.0",
+    "@prisma/client": "^6.19.0",
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/next-pwa": "^5.6.9",
+    "@types/qrcode": "^1.5.6",
+    "bcryptjs": "^3.0.3",
+    "framer-motion": "^14.14.0",
+    "idb-keyval": "^6.3.0",
+    "lucide-react": "^1.75.0",
+    "next": "^15.5.4",
+    "next-pwa": "^5.6.0",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "postcss": "^8.5.1",
+    "prisma": "^6.19.0",
+    "puppeteer-core": "^25.18.1",
+    "typescript": "^5.9.3"
+  }
+}

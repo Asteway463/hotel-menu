@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Restaurant: multi-tenant root. Each restaurant has fully isolated menus,
+// orders, branding and admin accounts.
+// ---------------------------------------------------------------------------
+model Restaurant {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  nameEn       String
+  nameAm       String
+  taglineEn    String   @default("")
+  taglineAm    String   @default("")
+  storyEn      String   @default("")
+  storyAm      String   @default("")
+  logo         String?
+  address      String?
+  phone        String?
+  email        String?
+  instagram    String?
+  facebook     String?
+  twitter      String?
+  tiktok       String?
+  openingHours String?
+  currency     String   @default("ETB")
+  wifiSsid     String?
+  wifiPassword String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  categories Category[]
+  products   Product[]
+  orders     Order[]
+  users      AdminUser[]
+}
+
+// ---------------------------------------------------------------------------
+// Menu category (e.g. Signature Burgers, Special Combos, ...)
+// ---------------------------------------------------------------------------
+model Category {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  nameEn        String
+  nameAm        String
+  slug          String
+  descriptionEn String?  @default("")
+  descriptionAm String?  @default("")
+  sortOrder     Int      @default(0)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  products Product[]
+
+  @@index([restaurantId])
+}
+
+// ---------------------------------------------------------------------------
+// Food / drink product. Prices are stored in the smallest currency unit
+// (integer ETB) and totals are always recomputed server-side.
+// ---------------------------------------------------------------------------
+model Product {
+  id           String     @id @default(uuid())
+  restaurantId String
+  categoryId   String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  nameEn         String
+  nameAm         String
+  descriptionEn  String   @default("")
+  descriptionAm  String   @default("")
+  image          String?
+  price          Int
+  compareAtPrice Int?
+  ingredientsEn  String?
+  ingredientsAm  String?
+  allergens      String?
+  featured       Boolean  @default(false)
+  available      Boolean  @default(true)
+  prepTime       Int?
+  sortOrder      Int      @default(0)
+  isCombo        Boolean  @default(false)
+  promoPrice     Int?
+  comboItems     String?
+  customizations String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([restaurantId, categoryId])
+}
+
+// ---------------------------------------------------------------------------
+// Order line items (snapshots of product + addons at purchase time).
+// ---------------------------------------------------------------------------
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  productName String
+  quantity    Int     @default(1)
+  unitPrice   Int
+  total       Int
+  notes       String?
+  addons      String?
+}
+
+// ---------------------------------------------------------------------------
+// Order: unique order number, type (dine-in / takeaway / delivery), status,
+// payment status and totals.
+// ---------------------------------------------------------------------------
+model Order {
+  id           String     @id @default(uuid())
+  orderNumber  String     @unique
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+
+  type           String    @default("DINING")
+  status         String    @default("PENDING")
+  subtotal       Int       @default(0)
+  discount       Int       @default(0)
+  total          Int       @default(0)
+  tax            Int       @default(0)
+  paymentStatus  String    @default("PENDING")
+  paymentMethod  String?
+  paidAt         DateTime?
+  customerNotes  String?
+  idempotencyKey String?   @unique
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Admin accounts (role based: OWNER, MANAGER, STAFF).
+// ---------------------------------------------------------------------------
+model AdminUser {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  email        String
+  passwordHash String
+  role         String     @default("OWNER")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  sessions     Session[]
+}
+
+// Local admin sessions (token is a random opaque value; only its SHA-256 hash
+// is persisted, cookie holds the raw token).
+model Session {
+  id          String    @id @default(uuid())
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+}
